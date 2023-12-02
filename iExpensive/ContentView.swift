@@ -8,14 +8,77 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var expenses = Expenses()
+    @State private var shoingAddExpense = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                Section("Business") {
+                    List {
+                        ForEach(expenses.items) { item in
+                            
+                            if item.type == "Business" {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(item.name)
+                                            .font(.headline)
+                                        
+                                        Text(item.type)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text(item.amount, format: .currency(code: item.currency))
+                                }
+                            }
+                        }
+                        .onDelete(perform: removeItems)
+                    }
+                }
+                Section("Personal") {
+                    List {
+                        ForEach(expenses.items) { item in
+                            
+                            if item.type == "Personal" {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(item.name)
+                                            .font(.headline)
+                                            .accessibilityLabel(item.name)
+                                        
+                                        Text(item.type)
+                                        accessibilityHint(item.type)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text(item.amount, format: .currency(code: item.currency))
+                                }
+                            }
+                        }
+                        .onDelete(perform: removeItems)
+                    }
+                }
+            }
+            
+            
+            .navigationTitle("iExpense")
+            .toolbar {
+                Button {
+                    shoingAddExpense = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            .sheet(isPresented: $shoingAddExpense){
+                AddView(expenses: expenses)
+            }
         }
-        .padding()
+    }
+    
+    func removeItems(at offsets: IndexSet) {
+        expenses.items.remove(atOffsets: offsets)
     }
 }
 
